@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Ensure the CSS file is linked -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>MovieShelf</h1>
+        <div id="user-welcome">Welcome, <span id="user-name">Arun</span>!</div>
+        
+        <div class="nav-links">
+            <a href="landpage.html" class="about-link">Home</a>
+            <button id="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <button id="create-watchlist-btn">
+                <span id="create-watchlist-text">Create Watchlist</span>
+                <span id="create-watchlist-spinner" class="spinner"></span>
+            </button>
+            <input type="text" id="watchlist-name" placeholder="Enter Watchlist Name">
+            <div id="errorMessage" class="error-message"></div>
+            <ul id="watchlist-container"></ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2>My Watchlists</h2>
+            <div id="watchlist-display">
+        </div>
+    </div>
+
+    <!-- Add Movie Modal -->
+    <div id="addMovieModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Add Movie</h2>
+            <form id="add-movie-form">
+                <input type="text" id="movie-name" placeholder="Movie Name">
+                <select id="movie-genre">
+                    <option value="" disabled selected>Select Genre</option>
+                    <option value="drama">Drama</option>
+                    <option value="comedy">Comedy</option>
+                    <option value="science fiction">Science Fiction</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="horror">Horror</option>
+                    <option value="thriller">Thriller</option>
+                    <option value="western">Western</option>
+                    <option value="musical">Musical</option>
+                </select>
+                <select id="platform">
+                    <option value="" disabled selected>Select Platform</option>
+                    <option value="netflix">Netflix</option>
+                    <option value="primevideo">Prime Video</option>
+                    <option value="hotstar">Hotstar</option>
+                    <option value="zee5">Zee5</option>
+                    <option value="sonyliv">SonyLiv</option>
+                    <option value="others">Others</option>
+                </select>
+                <textarea id="description" placeholder="Enter movie description..."></textarea>
+                <div class="star-rating">
+                    <span class="star" data-value="1">&#9733;</span>
+                    <span class="star" data-value="2">&#9733;</span>
+                    <span class="star" data-value="3">&#9733;</span>
+                    <span class="star" data-value="4">&#9733;</span>
+                    <span class="star" data-value="5">&#9733;</span>
+                </div>
+                <input type="hidden" id="review-rating" value="0">
+                <button id="add-movie-btn">Add Movie</button>
+                <button type="button" id="close-modal" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    
+    <script src="dashboard.js"></script>
+</body>
+</html>

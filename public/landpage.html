@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Watchlist - Organize Your Movie Universe</title>
+    <link rel="stylesheet" href="landpage.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-logo">MovieShelf</a>
+            <ul class="nav-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Never Lose Track of Your Movies Again</h1>
+                <p class="hero-subtitle">
+                    Organize movies you want to watch, track your ratings, discover new gems,
+                    and manage your personal film library effortlessly.
+                </p>
+                <a href="#signup" id="get-started-btn" class="btn btn-primary btn-lg">Get Started for Free</a>
+                <p class="hero-note">Simple, intuitive, and built for movie lovers.</p>
+            </div>
+            <div class="hero-image">
+                <img src="image.png" alt="Movie Watchlist Interface Mockup">
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title">Everything You Need to Curate Your Film World</h2>
+            <p class="section-subtitle">Powerful features designed for the ultimate movie tracking experience.</p>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-list-check"></i></div>
+                    <h3 class="feature-title">Unlimited Watchlists</h3>
+                    <p>Create and manage multiple watchlists for different genres, moods, or platforms.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-film"></i></div>
+                    <h3 class="feature-title">Detailed Movie Info</h3>
+                    <p>Add movies with details like genre, platform, ratings, and personal descriptions.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-star"></i></div>
+                    <h3 class="feature-title">Personal Ratings</h3>
+                    <p>Keep track of your own ratings to remember what you loved (or didn't).</p>
+                </div>
+                 <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-search"></i></div>
+                    <h3 class="feature-title">Easy Search & Filter</h3>
+                    <p>Quickly find movies within your lists based on title, genre, or rating.</p>
+                </div>
+                 <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3 class="feature-title">Cloud Sync</h3>
+                    <p>Access your watchlists from any device, anytime (Conceptual feature).</p>
+                </div>
+                 <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-share-alt"></i></div>
+                    <h3 class="feature-title">Share Lists (Future)</h3>
+                    <p>Optionally share your curated lists with friends (Conceptual feature).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="how-it-works-section">
+        <div class="container">
+             <h2 class="section-title">How MovieShelf Works</h2>
+             <p class="section-subtitle">Get started in just a few simple steps.</p>
+             <div class="steps-container">
+                 <div class="step-item">
+                     <div class="step-number">1</div>
+                     <h4>Sign Up / Login</h4>
+                     <p>Create a free account or log in using the form below.</p>
+                 </div>
+                 <div class="step-item">
+                     <div class="step-number">2</div>
+                     <h4>Add Movies</h4>
+                     <p>Search for movies and add them to your watchlists.</p>
+                 </div>
+                 <div class="step-item">
+                     <div class="step-number">3</div>
+                     <h4>Organize & Rate</h4>
+                     <p>Manage your lists, add details, and rate movies you've watched.</p>
+                 </div>
+             </div>
+         </div>
+    </section>
+
+    <section id="signup" class="signup-section">
+        <div class="container">
+             <div class="signup-container">
+                <h2 id="auth-title">Get Started Now</h2>
+                <form id="signup-form" data-mode="signup">
+                    <div class="input-box">
+                        <input type="text" id="username" placeholder="Username" required />
+                    </div>
+                    <div class="input-box">
+                        <input type="password" id="userpassword" placeholder="Password" required />
+                    </div>
+                    <button type="submit" class="signup-btn" id="register-btn">
+                        <span id="register-text">Create Account</span>
+                        <span id="register-spinner" style="display: none;">⏳</span>
+                    </button>
+                    <div id="errorMessage" style="color: #ff6b6b; margin-top: 15px; min-height: 1em;"></div>
+                </form>
+                <div class="login-option">
+                    <span id="toggle-prompt">Already have an account?</span>
+                    <a href="#" id="toggle-link" style="cursor: pointer; text-decoration: underline; color: #ff6b6b; font-weight: 600;">Login here</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Take Control of Your Movie List?</h2>
+            <a href="#signup" id="cta-start-btn" class="btn btn-primary btn-lg">Start Organizing Now</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-about">
+                <h4 class="footer-logo">MovieShelf</h4>
+                <p>Your personal space to manage and enjoy your movie journey.</p>
+                </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-support">
+                <h4>Support</h4>
+                <p>Need help? Get in touch!</p>
+                <a href="mailto:support@moviewatch.example.com" class="support-link">Contact Customer Support</a>
+                 <p>Or visit our <a href="#" class="support-link">Help Center</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+             <p>&copy; 2025 MovieShelf | DBMS Project. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Existing Element References ---
+            const signupForm = document.getElementById('signup-form');
+            const authTitle = document.getElementById('auth-title');
+            const usernameInput = document.getElementById('username');
+            const userpasswordInput = document.getElementById('userpassword');
+            const registerBtn = document.getElementById('register-btn');
+            const registerText = document.getElementById('register-text');
+            const registerSpinner = document.getElementById('register-spinner');
+            const errorMessageDiv = document.getElementById('errorMessage');
+            const togglePrompt = document.getElementById('toggle-prompt');
+            const toggleLink = document.getElementById('toggle-link');
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            const navbar = document.querySelector('.navbar');
+
+            // --- NEW: Element References for Scroll Buttons ---
+            const getStartedBtn = document.getElementById('get-started-btn');
+            const ctaStartBtn = document.getElementById('cta-start-btn');
+            const signupSection = document.getElementById('signup'); // The target section
+
+            // --- Existing Auth Mode Function ---
+            function setFormMode(mode) {
+                errorMessageDiv.textContent = '';
+                if (mode === 'login') {
+                    signupForm.dataset.mode = 'login';
+                    authTitle.textContent = 'Login';
+                    registerText.textContent = 'Login';
+                    userpasswordInput.placeholder = 'Password';
+                    togglePrompt.textContent = "Don't have an account?";
+                    toggleLink.textContent = 'Sign Up here';
+                } else {
+                    signupForm.dataset.mode = 'signup';
+                    authTitle.textContent = 'Get Started Now';
+                    registerText.textContent = 'Create Account';
+                    userpasswordInput.placeholder = 'Create a Password'; // Changed back for signup clarity
+                    togglePrompt.textContent = 'Already have an account?';
+                    toggleLink.textContent = 'Login here';
+                }
+                 registerBtn.disabled = false;
+                 registerText.style.display = "inline-block";
+                 registerSpinner.style.display = "none";
+            }
+
+            // --- Existing Toggle Link Listener ---
+            toggleLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                const currentMode = signupForm.dataset.mode;
+                setFormMode(currentMode === 'signup' ? 'login' : 'signup');
+            });
+
+            // --- Existing Form Submission Listener ---
+            signupForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                errorMessageDiv.textContent = '';
+                const username = usernameInput.value.trim();
+                const userpassword = userpasswordInput.value.trim();
+                const currentMode = signupForm.dataset.mode;
+
+                if (!username || !userpassword) {
+                    errorMessageDiv.textContent = 'Username and password are required.';
+                    return;
+                }
+
+                registerBtn.disabled = true;
+                registerText.style.display = "none";
+                registerSpinner.style.display = "inline-block";
+
+                let apiUrl = (currentMode === 'signup') ? "http://localhost:5000/auth/register" : "http://localhost:5000/auth/login";
+                let successMessage = (currentMode === 'signup') ? "Signup successful! Redirecting to Dashboard..." : null; // Alert only for signup
+
+                let responseOk = false; // Flag to check response status in finally block
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, userpassword })
+                    });
+
+                    responseOk = response.ok; // Store status before consuming body
+                    const data = await response.json();
+
+                    if (responseOk) {
+                        if (successMessage) {
+                             alert(successMessage);
+                        }
+                        console.log(`${currentMode} successful:`, data);
+                        localStorage.setItem("username", username);
+                        window.location.href = "dashboard.html";
+                        return; // Exit after successful redirect start
+                    } else {
+                        errorMessageDiv.textContent = data.error || `${currentMode === 'signup' ? 'Registration' : 'Login'} failed. Please try again.`;
+                        console.error(`${currentMode} Error Response:`, data);
+                    }
+                } catch (error) {
+                    console.error(`Error during ${currentMode}:`, error);
+                    errorMessageDiv.textContent = `Failed to ${currentMode}. Check connection or try again later.`;
+                } finally {
+                     // Re-enable button ONLY if redirection didn't happen (i.e., an error occurred)
+                    if (!responseOk) {
+                        registerBtn.disabled = false;
+                        registerText.style.display = "inline-block";
+                        registerSpinner.style.display = "none";
+                    }
+                }
+            });
+
+            // --- NEW: Smooth Scroll Logic ---
+            const scrollToSignup = (event) => {
+                event.preventDefault(); // Prevent default anchor behavior
+                if (signupSection) {
+                    signupSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); // scroll to the top of the section
+                }
+            };
+
+            // Attach listeners to scroll buttons
+            if (getStartedBtn) {
+                getStartedBtn.addEventListener('click', scrollToSignup);
+            }
+            if (ctaStartBtn) {
+                ctaStartBtn.addEventListener('click', scrollToSignup);
+            }
+
+            // --- Existing Hamburger Menu Logic ---
+             if (hamburger && navMenu) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                document.querySelectorAll('.nav-menu a').forEach(n => n.addEventListener('click', () => {
+                     if (navMenu.classList.contains('active')) {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                }));
+            }
+
+             // --- Existing Navbar Scroll Effect Logic ---
+             if (navbar) {
+                 window.addEventListener('scroll', () => {
+                     navbar.classList.toggle('scrolled', window.scrollY > 50);
+                 });
+             }
+
+            // --- Initialize form state ---
+            setFormMode('signup');
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>

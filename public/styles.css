@@ -1,0 +1,609 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* Consider using Segoe UI as specified later, or choose one */
+    font-family: 'Segoe UI', 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #121212; /* Dark background like target image */
+    color: #00a8a8;
+    font-family: 'Segoe UI', sans-serif;
+    height: 100vh;
+    /* overflow: auto; Allows body scroll if content exceeds viewport height */
+    /* Prevent body scroll if dashboard container handles it */
+    overflow: hidden;
+}
+
+/* Navbar */
+.navbar {
+    position: fixed; /* Keep fixed */
+    top: 0;
+    width: 100%;
+    background: rgba(30, 30, 30, 0.8); /* Slightly transparent dark bg */
+    backdrop-filter: blur(8px); /* Subtle blur */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 30px; /* Adjusted padding */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    z-index: 1000;
+    border-bottom: 1px solid #333; /* Optional faint border */
+}
+
+.navbar h1 {
+    font-size: 22px; /* Adjusted size */
+    color: #ffffff; /* White title */
+    font-weight: 600;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Slightly more gap */
+}
+
+#user-welcome {
+    font-size: 16px; /* Adjusted size */
+    color: #e0e0e0; /* Light grey */
+}
+
+/* Optional: Hide About link if not needed */
+/* .about-link { display: none; } */
+
+.about-link {
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.about-link:hover {
+    color: #ffffff;
+}
+
+#logout-btn {
+    padding: 8px 16px; /* Adjusted padding */
+    background: #444; /* Darker button */
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 6px; /* Slightly more rounded */
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+#logout-btn:hover {
+    background: #00a8a8;
+    border-color: #666;
+    color: #ffffff;
+}
+
+
+/* Dashboard Container */
+.dashboard-container {
+    display: flex;
+    /* Adjust margin-top based on actual navbar height */
+    margin-top: 60px; /* Example: If navbar is 60px tall */
+    height: calc(100vh - 60px); /* Adjust calc based on navbar height */
+    padding: 20px;
+    gap: 25px; /* Adjusted gap */
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #2a2a2a; /* Sidebar background */
+    border-radius: 12px; /* Adjusted radius */
+    padding: 25px 20px; /* Adjusted padding */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column; /* Align items vertically */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+}
+
+.sidebar h2 {
+    font-size: 18px; /* Adjusted size */
+    margin-bottom: 20px; /* Increased margin */
+    color: #e0e0e0; /* Lighter text */
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333; /* Separator */
+}
+
+#create-watchlist-btn {
+    width: 100%;
+    padding: 10px; /* Adjusted padding */
+    background: #00a8a8; /* Accent color */
+    border: none;
+    color: white;
+    font-weight: 600; /* Bolder */
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-bottom: 15px; /* Space below button */
+    text-align: center;
+}
+
+#create-watchlist-btn:hover {
+    background: #009292; /* Darker shade on hover */
+}
+
+/* Optional Spinner Styles (keep if you use them) */
+.spinner {
+    display: none; /* Initially hidden */
+    /* Add spinner animation styles here if needed */
+}
+#create-watchlist-btn.loading .spinner {
+    display: inline-block;
+}
+#create-watchlist-btn.loading #create-watchlist-text {
+    display: none; /* Hide text when loading */
+}
+
+
+#watchlist-name { /* Input field */
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 10px; /* Space below input */
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #2a2a2a;
+    color: white;
+    font-size: 14px;
+}
+#watchlist-name::placeholder {
+    color: #888;
+}
+
+/* Error message style (keep if you use it) */
+.error-message {
+    color: #ff5c5c;
+    font-size: 12px;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    min-height: 1.2em; /* Reserve space */
+}
+
+
+/* Watchlist Items (in sidebar) */
+#watchlist-container {
+    margin-top: 15px; /* Adjusted margin */
+    list-style: none;
+    padding: 0;
+    overflow-y: auto; /* Allow scrolling if list is long */
+    flex-grow: 1; /* Take remaining space */
+}
+
+#watchlist-container li {
+    padding: 10px 12px;
+    background: transparent; /* Make items transparent */
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    color: #b0b0b0; /* Default text color */
+    transition: background 0.2s ease, color 0.2s ease;
+    font-size: 14px;
+    border: 1px solid transparent; /* Placeholder for hover border */
+}
+
+#watchlist-container li:hover {
+    background: #2a2a2a; /* Background on hover */
+    color: #ffffff;
+}
+#watchlist-container li.active { /* Style for selected watchlist */
+    background: #333;
+    color: #ffffff;
+    font-weight: 600;
+    border: 1px solid #444;
+}
+
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    background: #1a1a1a; /* Main content background */
+    border-radius: 12px;
+    padding: 30px;
+    overflow-y: auto; /* Allows vertical scrolling for the list of watchlists */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.main-content h2 { /* "My Watchlists" title */
+    font-size: 24px; /* Adjusted size */
+    margin-bottom: 25px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Container for a single watchlist row (Title + Movies) */
+/* Neumorphic Container for a single watchlist row */
+.watchlist-row {
+    background: #1a1a1a; /* MATCHES .main-content background */
+    border-radius: 20px;  /* Softer corners are key */
+    padding: 25px 30px;   /* Padding inside the row */
+    margin-bottom: 45px; /* Space between neumorphic rows */
+    transition: box-shadow 0.3s ease-in-out; /* Smooth transition for hover */
+
+    /* Neumorphic Shadows: light top-left, dark bottom-right */
+    /* Adjust colors based on #1a1a1a background */
+    /* Light shadow (slightly lighter than #1a1a1a) */
+    /* Dark shadow (slightly darker than #1a1a1a) */
+    box-shadow:
+        /* Dark shadow (bottom-right) */
+        7px 7px 15px rgba(0, 0, 0, 0.4), /* Adjust #0d0d0d or rgba as needed */
+        /* Light shadow (top-left) */
+        -7px -7px 15px rgba(42, 42, 42, 0.7); /* Adjust #272727 or rgba as needed */
+
+    /* Optional: Slight border can sometimes help definition */
+    /* border: 1px solid #222; */
+}
+
+/* Optional: Subtle hover effect - slightly intensify shadows or flatten */
+.watchlist-row:hover {
+     box-shadow:
+        /* Dark shadow (bottom-right) - slightly more intense */
+        9px 9px 18px rgba(0, 0, 0, 0.5),
+        /* Light shadow (top-left) - slightly more intense */
+        -9px -9px 18px rgba(42, 42, 42, 0.8);
+
+     /* Or flatten the effect on hover: */
+     /* box-shadow: inset 2px 2px 5px #121212, inset -2px -2px 5px #222222; */
+}
+
+
+/* Keep the watchlist title style */
+.watchlist-row h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #e0e0e0;
+    font-weight: 600;
+    /* Add some padding if title feels too close to the neumorphic edge */
+    /* padding-left: 5px; */
+}
+
+/* --- Keep the rest of your CSS (.watchlist-grid, .movie-card, etc.) as is --- */
+
+/* Watchlist Grid for horizontal movie display */
+.watchlist-grid {
+    display: flex;          /* Horizontal layout */
+    flex-wrap: nowrap;      /* Single line */
+    overflow-x: auto;      /* Horizontal scroll */
+    gap: 20px;             /* Adjusted gap between movie cards */
+    padding: 5px 0 20px 0; /* Add padding below cards */
+
+    /* Hide scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+.watchlist-grid::-webkit-scrollbar { /* Chrome/Safari/Opera */
+    display: none;
+}
+
+
+/* Movie Card */
+.movie-card {
+    background: #2c2c2c; /* Card background */
+    border-radius: 10px; /* Adjusted radius */
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    width: 240px; /* Adjusted width to fit more cards potentially */
+    flex-shrink: 0;
+    border: 1px solid #383838; /* Subtle border */
+}
+
+.movie-card:hover {
+    transform: translateY(-5px) scale(1.02); /* Lift effect */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Optional: Uncomment if you want images back */
+/*
+.movie-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+}
+*/
+
+.movie-content { /* Add a wrapper for padding */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allow content to grow */
+}
+
+
+.movie-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items top */
+    margin-bottom: 10px; /* Space below header */
+}
+
+.movie-header h4 { /* Movie Title */
+    font-size: 16px; /* Adjusted size */
+    color: #ffffff;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+    /* Allow title wrapping if needed, remove ellipsis */
+    /* white-space: nowrap; */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+}
+
+/* Refined style for trash icon INSIDE movie card header */
+.trash-icon {
+    font-size: 16px;      /* Keep size reasonable */
+    color: #777;          /* Subtle grey color */
+    cursor: pointer;
+    transition: color 0.2s ease;
+    flex-shrink: 0;       /* Prevent shrinking */
+    margin-left: 10px;    /* Space from movie title */
+    /* Remove padding-top, alignment handled by flexbox in .movie-header */
+    /* padding-top: 2px; */
+    /* Align self vertically if needed, depends on .movie-header */
+    /* align-self: center; */
+}
+
+.trash-icon:hover {
+    color: #ff6b6b;       /* Slightly softer red on hover */
+}
+
+
+/* Styles for Genre, Platform, etc. - Replace .movie-tags */
+.movie-card p {
+    font-size: 13px; /* Smaller font for details */
+    color: #b0b0b0;
+    line-height: 1.5;
+    margin-bottom: 6px; /* Space between detail lines */
+}
+.movie-card p strong { /* Optional: for labels like "Genre:" */
+    color: #d0d0d0;
+    font-weight: 500;
+}
+
+/* Specific style for description */
+p.movie-description {
+    font-size: 12px;
+    color: #999;
+    /* Limit description lines */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: auto; /* Push description towards bottom if space allows */
+    padding-top: 10px;
+}
+
+
+/* Rating Stars */
+.movie-rating {
+    color: #f39c12; /* Gold color for stars */
+    font-size: 16px; /* Adjust star size */
+    margin-bottom: 10px; /* Space below stars */
+}
+.movie-rating span { /* Individual star */
+    margin-right: 2px;
+}
+
+/* Modern Add Movie Panel Styles */
+/* Modal Styles */
+#addMovieModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fix it to viewport */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    z-index: 1000;
+    width: 500px; /* Slightly wider for better spacing */
+    max-width: 90%;
+    padding: 30px;
+    background: #2a2a2a; /* Dark background */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: #fff; /* White text for contrast */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+}
+
+#addMovieModal.show {
+    display: block; /* Show modal */
+    opacity: 1;
+}
+
+.modal-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Add spacing between elements */
+}
+
+.modal-content h2 {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #444; /* Darker border */
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+    color: #fff; /* White text */
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+    border-color: #6200ea; /* Purple border on focus */
+    box-shadow: 0px 0px 10px rgba(98, 0, 234, 0.3); /* Glow effect */
+    outline: none; /* Remove default outline */
+}
+
+/* Dropdown Styling */
+.modal-content select {
+    appearance: none;
+    background: #3a3a3a; /* Darker background for contrast */
+    color: #ffffff !important; /* Ensure white text */
+    border: 1px solid #777; /* Visible border */
+    padding: 10px;
+    font-size: 16px;
+}
+.modal-content select {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 30px;
+}
+
+.modal-content textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 120px; /* Minimum height */
+}
+
+/* Star Rating */
+.star-rating {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    gap: 12px; /* Add spacing between stars */
+}
+
+.star {
+    font-size: 30px; /* Larger stars */
+    color: #ccc; /* Default star color */
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+}
+
+.star:hover,
+.star.active {
+    color: #ffd700; /* Gold color for active/hover stars */
+    transform: scale(1.2); /* Slight zoom effect */
+}
+
+/* Modal Footer (Buttons) */
+.modal-footer {
+    display: flex;
+    justify-content: center; /* Center align buttons */
+    align-items: center;
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.modal-footer button {
+    flex: 1;
+    padding: 15px; /* Larger buttons */
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+#add-movie-btn, #close-modal {
+    width: 45%; /* Reduce size */
+    padding: 14px; /* Slightly smaller */
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    position: relative;
+}
+
+/* Button Colors */
+#add-movie-btn {
+    background: linear-gradient(135deg, #6200ea, #8e24aa);
+    color: white;
+}
+
+#add-movie-btn:hover {
+    background: linear-gradient(135deg, #4500b3, #6200ea);
+}
+
+#close-modal {
+    background: linear-gradient(135deg, #f44336, #ff7043);
+    color: white;
+}
+
+#close-modal:hover {
+    background: linear-gradient(135deg, #c12c20, #f44336);
+}
+/* Loading Spinner */
+.spinner {
+    display: none;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error Message Styling */
+.error-message {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #addMovieModal {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .modal-content {
+        padding: 15px;
+    }
+
+    .modal-content h2 {
+        font-size: 22px;
+    }
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .star {
+        font-size: 26px;
+    }
+
+    .modal-footer button {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
