@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
-require("dotenv").config();
 
 const app = express();
 
@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // CORS Configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-render-app.onrender.com']
+    ? ['https://movieshelff.onrender.com']
     : 'http://localhost:5500',
   optionsSuccessStatus: 200
 };
