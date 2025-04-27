@@ -1,6 +1,5 @@
 // ===== DOM ELEMENTS =====
 const signupForm = document.getElementById("signup-form");
-const loginForm = document.getElementById("loginForm");
 const errorMessage = document.getElementById("errorMessage");
 const registerBtn = document.getElementById("register-btn");
 const registerText = document.getElementById("register-text");
@@ -15,67 +14,76 @@ const navMenu = document.querySelector(".nav-menu");
 const navbar = document.querySelector(".navbar");
 
 // ===== AUTH FUNCTIONS =====
-async function handleAuth(event, mode) {
-  event.preventDefault();
-  errorMessage.textContent = "";
+async function handleAuth(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const isLoginMode = form.dataset.mode === 'login';
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('userpassword').value.trim();
 
-  const username = document.getElementById("username").value.trim();
-  const passwordField = mode === 'register' ? "userpassword" : "password";
-  const userpassword = document.getElementById(passwordField).value.trim();
+    // Validation
+    if (!username || !password) {
+        errorMessage.textContent = "Username and password are required";
+        return;
+    }
 
-  if (!username || !userpassword) {
-    errorMessage.textContent = "Username and password are required.";
-    return;
-  }
-
-  // Show loading state
-  if (registerBtn) {
+    // Show loading state
     registerBtn.disabled = true;
     registerText.style.display = "none";
     registerSpinner.style.display = "inline-block";
-  }
 
-  try {
-    const endpoint = mode === 'register' ? 'register' : 'login';
-    const apiUrl = `${window.location.origin}/auth/${endpoint}`;
-    
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, userpassword })
-    });
+    try {
+        const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username, 
+                userpassword: password 
+            })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (response.ok) {
-      localStorage.setItem("username", username);
-      window.location.href = "dashboard.html";
-    } else {
-      errorMessage.textContent = data.error || `${mode === 'register' ? 'Registration' : 'Login'} failed`;
+        if (!response.ok) {
+            throw new Error(data.error || 'Authentication failed');
+        }
+
+        // Schema-aligned data storage
+        const userId = data.data?.userId || data.user?.id;
+        if (!userId) throw new Error('Missing user ID');
+        
+        localStorage.setItem('username', username);
+        localStorage.setItem('userId', userId); // Critical for watchlists.user_id
+        
+        window.location.href = 'dashboard.html';
+
+    } catch (error) {
+        errorMessage.textContent = error.message;
+        console.error('Auth error:', error);
+    } finally {
+        registerBtn.disabled = false;
+        registerText.style.display = "inline-block";
+        registerSpinner.style.display = "none";
     }
-  } catch (error) {
-    console.error("Auth error:", error);
-    errorMessage.textContent = "Network error. Please try again.";
-  } finally {
-    if (registerBtn) {
-      registerBtn.disabled = false;
-      registerText.style.display = "inline-block";
-      registerSpinner.style.display = "none";
-    }
-  }
 }
 
 function toggleAuthMode(event) {
-  event.preventDefault();
-  const currentMode = signupForm.dataset.mode;
-  const newMode = currentMode === 'signup' ? 'login' : 'signup';
-  
-  signupForm.dataset.mode = newMode;
-  authTitle.textContent = newMode === 'login' ? 'Login' : 'Get Started Now';
-  if (registerText) registerText.textContent = newMode === 'login' ? 'Login' : 'Create Account';
-  togglePrompt.textContent = newMode === 'login' ? "Don't have an account?" : "Already have an account?";
-  toggleLink.textContent = newMode === 'login' ? 'Sign Up here' : 'Login here';
-  errorMessage.textContent = "";
+    event.preventDefault();
+    const form = document.getElementById('signup-form');
+    const isLogin = form.dataset.mode === 'login';
+    
+    // Toggle the mode
+    form.dataset.mode = isLogin ? 'signup' : 'login';
+    
+    // Update UI
+    authTitle.textContent = isLogin ? 'Get Started' : 'Login';
+    registerText.textContent = isLogin ? 'Create Account' : 'Login';
+    document.getElementById('userpassword').placeholder = isLogin ? 'Create a Password' : 'Password';
+    togglePrompt.textContent = isLogin ? 'Already have an account?' : 'Need an account?';
+    toggleLink.textContent = isLogin ? 'Login here' : 'Sign up';
+    errorMessage.textContent = '';
 }
 
 // ===== UI FUNCTIONS =====
@@ -113,8 +121,7 @@ function setupNavbarScroll() {
 // ===== INITIALIZE =====
 document.addEventListener("DOMContentLoaded", () => {
   // Auth Setup
-  if (signupForm) signupForm.addEventListener("submit", (e) => handleAuth(e, 'register'));
-  if (loginForm) loginForm.addEventListener("submit", (e) => handleAuth(e, 'login'));
+  if (signupForm) signupForm.addEventListener("submit", handleAuth);
   if (toggleLink) toggleLink.addEventListener("click", toggleAuthMode);
 
   // UI Setup
