@@ -661,3 +661,13 @@ section {
         font-size: 1.6rem;
     }
 }
+
+.hidden-spinner {
+    display: none;
+  }
+  
+  .error-message {
+    color: #ff6b6b;
+    margin-top: 15px;
+    min-height: 1em;
+  }

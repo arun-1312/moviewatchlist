@@ -7,30 +7,47 @@ const bcrypt = require("bcryptjs");
 
 const app = express();
 
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", 
-    "default-src 'self'; font-src 'self' https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com; script-src 'self'; img-src 'self';"
-  );
-  next();
-});
-
-const helmet = require('helmet');
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-    styleSrc: ["'self'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-    fontSrc: ["'self'", "https://fonts.gstatic.com"],
-    imgSrc: ["'self'", "data:"],
-    connectSrc: ["'self'"],
-    objectSrc: ["'none'"],
-    upgradeInsecureRequests: [],
-  }
-}));
-
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const helmet = require('helmet');
+
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: [
+      "'self'",
+      "'unsafe-inline'", // Allows inline scripts (temporary for student project)
+      "https://cdnjs.cloudflare.com"
+    ],
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'", // Allows inline styles (temporary)
+      "https://fonts.googleapis.com", 
+      "https://cdnjs.cloudflare.com"
+    ],
+    fontSrc: [
+      "'self'",
+      "data:",
+      "https://fonts.gstatic.com",
+      "https://cdnjs.cloudflare.com"
+    ],
+    imgSrc: [
+      "'self'",
+      "data:",
+      "https://*.tmdn.org"
+    ],
+    connectSrc: [
+      "'self'",
+      process.env.NODE_ENV === 'production' 
+        ? 'https://movieshelff.onrender.com' 
+        : 'http://localhost:5000'
+    ]
+  }
+}));
+
+
 
 // CORS Configuration
 const corsOptions = {

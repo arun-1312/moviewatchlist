@@ -1,91 +1,129 @@
-document.getElementById("signup-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent form from reloading the page
+// ===== DOM ELEMENTS =====
+const signupForm = document.getElementById("signup-form");
+const loginForm = document.getElementById("loginForm");
+const errorMessage = document.getElementById("errorMessage");
+const registerBtn = document.getElementById("register-btn");
+const registerText = document.getElementById("register-text");
+const registerSpinner = document.getElementById("register-spinner");
+const toggleLink = document.getElementById("toggle-link");
+const authTitle = document.getElementById("auth-title");
+const togglePrompt = document.getElementById("toggle-prompt");
+const getStartedBtn = document.getElementById("get-started-btn");
+const ctaStartBtn = document.getElementById("cta-start-btn");
+const hamburger = document.querySelector(".hamburger");
+const navMenu = document.querySelector(".nav-menu");
+const navbar = document.querySelector(".navbar");
 
-    const username = document.getElementById("username").value;
-    const userpassword = document.getElementById("userpassword").value;
-    const errorMessage = document.getElementById("errorMessage");
-    const registerBtn = document.getElementById("register-btn");
-    const registerText = document.getElementById("register-text");
-    const registerSpinner = document.getElementById("register-spinner");
+// ===== AUTH FUNCTIONS =====
+async function handleAuth(event, mode) {
+  event.preventDefault();
+  errorMessage.textContent = "";
 
-    // Clear previous error message
-    errorMessage.textContent = "";
+  const username = document.getElementById("username").value.trim();
+  const passwordField = mode === 'register' ? "userpassword" : "password";
+  const userpassword = document.getElementById(passwordField).value.trim();
 
-    // Basic validation
-    if (!username || !userpassword) {
-        errorMessage.textContent = "Username and password are required.";
-        return;
-    }
+  if (!username || !userpassword) {
+    errorMessage.textContent = "Username and password are required.";
+    return;
+  }
 
-    // Disable button and show spinner
+  // Show loading state
+  if (registerBtn) {
     registerBtn.disabled = true;
     registerText.style.display = "none";
     registerSpinner.style.display = "inline-block";
+  }
 
-    try {
-        const response = await fetch("http://localhost:5000/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, userpassword })
-        });
+  try {
+    const endpoint = mode === 'register' ? 'register' : 'login';
+    const apiUrl = `${window.location.origin}/auth/${endpoint}`;
+    
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, userpassword })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (response.ok) {
-            alert("Signup successful! Redirecting to Dashboard...");
-            localStorage.setItem("username", username);
-            window.location.href = "dashboard.html";
-        } else {
-            // Show error message from backend
-            errorMessage.textContent = data.error || "Registration failed. Please try again.";
+    if (response.ok) {
+      localStorage.setItem("username", username);
+      window.location.href = "dashboard.html";
+    } else {
+      errorMessage.textContent = data.error || `${mode === 'register' ? 'Registration' : 'Login'} failed`;
+    }
+  } catch (error) {
+    console.error("Auth error:", error);
+    errorMessage.textContent = "Network error. Please try again.";
+  } finally {
+    if (registerBtn) {
+      registerBtn.disabled = false;
+      registerText.style.display = "inline-block";
+      registerSpinner.style.display = "none";
+    }
+  }
+}
+
+function toggleAuthMode(event) {
+  event.preventDefault();
+  const currentMode = signupForm.dataset.mode;
+  const newMode = currentMode === 'signup' ? 'login' : 'signup';
+  
+  signupForm.dataset.mode = newMode;
+  authTitle.textContent = newMode === 'login' ? 'Login' : 'Get Started Now';
+  if (registerText) registerText.textContent = newMode === 'login' ? 'Login' : 'Create Account';
+  togglePrompt.textContent = newMode === 'login' ? "Don't have an account?" : "Already have an account?";
+  toggleLink.textContent = newMode === 'login' ? 'Sign Up here' : 'Login here';
+  errorMessage.textContent = "";
+}
+
+// ===== UI FUNCTIONS =====
+function scrollToSignup(event) {
+  event.preventDefault();
+  document.getElementById("signup").scrollIntoView({ behavior: 'smooth' });
+}
+
+function setupMobileMenu() {
+  if (hamburger && navMenu) {
+    hamburger.addEventListener("click", () => {
+      hamburger.classList.toggle("active");
+      navMenu.classList.toggle("active");
+    });
+
+    document.querySelectorAll(".nav-menu a").forEach(link => {
+      link.addEventListener("click", () => {
+        if (navMenu.classList.contains("active")) {
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
         }
-    } catch (error) {
-        console.error("Error during registration:", error);
-        errorMessage.textContent = "Failed to register. Please try again.";
-    } finally {
-        // Re-enable button and hide spinner
-        registerBtn.disabled = false;
-        registerText.style.display = "inline-block";
-        registerSpinner.style.display = "none";
-    }
-});
+      });
+    });
+  }
+}
 
-document.getElementById("loginForm").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent default form submission
+function setupNavbarScroll() {
+  if (navbar) {
+    window.addEventListener("scroll", () => {
+      navbar.classList.toggle("scrolled", window.scrollY > 50);
+    });
+  }
+}
 
-    const username = document.getElementById("username").value;
-    const userpassword = document.getElementById("password").value;
-    const errorMessage = document.getElementById("errorMessage");
+// ===== INITIALIZE =====
+document.addEventListener("DOMContentLoaded", () => {
+  // Auth Setup
+  if (signupForm) signupForm.addEventListener("submit", (e) => handleAuth(e, 'register'));
+  if (loginForm) loginForm.addEventListener("submit", (e) => handleAuth(e, 'login'));
+  if (toggleLink) toggleLink.addEventListener("click", toggleAuthMode);
 
-    // Clear previous error message
-    errorMessage.textContent = "";
+  // UI Setup
+  if (getStartedBtn) getStartedBtn.addEventListener("click", scrollToSignup);
+  if (ctaStartBtn) ctaStartBtn.addEventListener("click", scrollToSignup);
+  
+  setupMobileMenu();
+  setupNavbarScroll();
 
-    // Basic validation
-    if (!username || !userpassword) {
-        errorMessage.textContent = "Username and password are required.";
-        return;
-    }
-
-    try {
-        const response = await fetch("http://localhost:5000/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, userpassword })
-        });
-
-        const result = await response.json();
-        console.log("Login Response:", result); // Log the response
-
-        if (response.ok) {
-            // ✅ Store user session & Redirect
-            localStorage.setItem("username", username);
-            window.location.href = "dashboard.html";
-        } else {
-            // ❌ Show error message if login fails
-            errorMessage.textContent = result.error || "Invalid credentials";
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        errorMessage.textContent = "Failed to login. Please try again.";
-    }
+  // Initialize form mode
+  if (signupForm) signupForm.dataset.mode = 'signup';
 });
