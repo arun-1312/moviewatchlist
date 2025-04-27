@@ -14,6 +14,21 @@ app.use((req, res, next) => {
   next();
 });
 
+// CSP Headers (to allow external fonts, styles, and safe scripts)
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data:; " +
+    "connect-src 'self'; " +
+    "frame-src 'self';"
+  );
+  next();
+});
+
+
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

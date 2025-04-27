@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function logout() {
     localStorage.removeItem("username");
-    window.location.href = "landpage.html";
+    window.location.href = "index.html";
 }
 function setupEventListeners() {
     const createWatchlistBtn = document.getElementById("create-watchlist-btn");
