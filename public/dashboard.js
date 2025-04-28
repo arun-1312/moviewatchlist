@@ -5,12 +5,28 @@ const API_BASE = window.location.hostname === 'localhost'
 
 // Helper function to get watchlist ID by name
 async function getWatchlistIdByName(watchlistName) {
-  const userId = localStorage.getItem("userId");
-  const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
-  const watchlists = await response.json();
-  const watchlist = watchlists.find(w => w.name === watchlistName);
-  return watchlist?.id;
-}
+    const userId = localStorage.getItem("userId");
+    try {
+      const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+  
+      const result = await response.json();
+      
+      // Handle both possible response formats:
+      // 1. Direct array response
+      // 2. { success: true, data: [...] } format
+      const watchlists = Array.isArray(result) ? result : (result.data || []);
+      
+      const watchlist = watchlists.find(w => w.name === watchlistName);
+      if (!watchlist) {
+        throw new Error(`Watchlist "${watchlistName}" not found`);
+      }
+      return watchlist.id;
+    } catch (error) {
+      console.error("Error getting watchlist ID:", error);
+      throw error; // Re-throw to be caught in addMovie
+    }
+  }
 
 document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username");
@@ -238,49 +254,71 @@ async function createWatchlist() {
 async function addMovie(event) {
     event.preventDefault();
     
-    const formData = {
+    // Show loading state
+    const submitBtn = document.getElementById("movie-submit-btn");
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+  
+    try {
+      const formData = {
         name: document.getElementById("movie-name").value.trim(),
         genre: document.getElementById("movie-genre").value,
         platform: document.getElementById("platform").value,
         description: document.getElementById("description").value.trim(),
         review: parseInt(document.getElementById("review-rating").value) || 0,
         watchlistName: localStorage.getItem("selectedWatchlist")
-    };
-
-    if (!formData.name || !formData.genre || !formData.platform || !formData.watchlistName) {
-        alert("Please fill in all required fields.");
-        return;
-    }
-
-    try {
-        const watchlistId = await getWatchlistIdByName(formData.watchlistName);
-        if (!watchlistId) throw new Error("Watchlist not found");
-
-        const response = await fetch(`${API_BASE}/movies`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                watchlist_id: watchlistId,
-                name: formData.name,
-                genre: formData.genre,
-                review: formData.review,
-                description: formData.description,
-                platform: formData.platform
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || "Failed to add movie");
-        }
-
-        closeModal();
-        await fetchMovies(formData.watchlistName);
+      };
+  
+      // Validate required fields
+      if (!formData.name || !formData.genre || !formData.platform || !formData.watchlistName) {
+        throw new Error("Please fill in all required fields");
+      }
+  
+      // Get watchlist ID
+      const watchlistId = await getWatchlistIdByName(formData.watchlistName);
+      if (!watchlistId) {
+        throw new Error("Failed to find watchlist");
+      }
+  
+      // Submit to API
+      const response = await fetch(`${API_BASE}/movies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          watchlist_id: watchlistId,
+          name: formData.name,
+          genre: formData.genre,
+          review: formData.review,
+          description: formData.description,
+          platform: formData.platform
+        })
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add movie");
+      }
+  
+      const result = await response.json();
+      console.log("Movie added successfully:", result);
+      
+      // Refresh the movies list
+      await fetchMovies(formData.watchlistName);
+      closeModal();
+      
+      // Show success message
+      alert("Movie added successfully!");
+  
     } catch (error) {
-        console.error("Add movie error:", error);
-        alert(error.message);
+      console.error("Add movie error:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
     }
-}
+  }
 
 async function fetchMovies(watchlistName) {
     try {
