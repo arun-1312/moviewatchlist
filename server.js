@@ -7,6 +7,10 @@ const bcrypt = require("bcryptjs");
 
 const app = express();
 
+const API_BASE = process.env.NODE_ENV === 'production' 
+  ? 'https://movieshelff.onrender.com' 
+  : 'http://localhost:5000';
+
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));

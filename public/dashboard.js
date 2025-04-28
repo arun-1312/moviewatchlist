@@ -1,3 +1,8 @@
+const API_BASE = process.env.NODE_ENV === 'production' 
+  ? 'https://movieshelff.onrender.com' 
+  : 'http://localhost:5000';
+  
+
 document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username");
     if (!username) {
@@ -27,12 +32,14 @@ function setupEventListeners() {
     if (addMovieForm) addMovieForm.addEventListener("submit", addMovie);
 }
 
+
 async function fetchWatchlists() {
-    const user_id = localStorage.getItem("userId");
+    const userId = localStorage.getItem("userId");
     if (!username) return;
 
     try {
-        const response = await fetch(`https://movieshelff.onrender.com/watchlists?user_id=${encodeURIComponent(userId)}`);
+        const userId = localStorage.getItem("userId");
+        const response = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const watchlists = await response.json();
@@ -236,22 +243,34 @@ function displayMovies(movies, watchlistName) {
 
 
 async function deleteMovie(movieName, watchlistName) {
-    const username = localStorage.getItem("username");
-    if (!username || !watchlistName || !movieName) return;
+    const userId = localStorage.getItem("userId");
+    if (!userId || !watchlistName || !movieName) return;
 
     // Confirmation dialog
     const confirmDelete = confirm("Are you sure you want to delete this movie?");
     if (!confirmDelete) return;
 
     try {
-        const response = await fetch('http://localhost:5000/movies', {
+        // First get watchlist_id for the watchlistName
+        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
+        const watchlists = await watchlistResponse.json();
+        const watchlist = watchlists.find(w => w.name === watchlistName);
+        
+        if (!watchlist) {
+            throw new Error("Watchlist not found");
+        }
+
+        const response = await fetch('/movies', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, watchlistName, movieName })
+            body: JSON.stringify({
+                watchlist_id: watchlist.id,
+                movieName
+            })
         });
 
         const result = await response.json();
-        console.log("Backend Response:", result); // Debugging
+        console.log("Backend Response:", result);
 
         if (!response.ok) {
             throw new Error(result.error || `HTTP error! Status: ${response.status}`);
@@ -261,7 +280,7 @@ async function deleteMovie(movieName, watchlistName) {
         fetchMovies(watchlistName); // Refresh the movie list
     } catch (error) {
         console.error("Error deleting movie:", error);
-        alert("Failed to delete movie. Please try again.");
+        alert(error.message || "Failed to delete movie. Please try again.");
     }
 }
 
@@ -316,122 +335,96 @@ async function createWatchlist() {
 }
 
 async function addMovie(event) {
+    event.preventDefault();
 
-        event.preventDefault();
-    
-    
-    
-        const movieName = document.getElementById("movie-name").value.trim();
-    
-        const genre = document.getElementById("movie-genre").value;
-    
-        const platform = document.getElementById("platform").value;
-    
-        const description = document.getElementById("description").value.trim();
-    
-        const review = document.getElementById("review-rating").value;
-    
-        const watchlistName = localStorage.getItem("selectedWatchlist"); // Get stored watchlist
-    
-        const username = localStorage.getItem("username");
-    
-    
-    
-        if (!movieName || !genre || !platform || !watchlistName) {
-    
-            alert("Please fill in all fields.");
-    
-            return;
-    
-        }
-    
-    
-    
-        try {
-    
-            const response = await fetch('http://localhost:5000/movies', {
-    
-                method: 'POST',
-    
-                headers: { 'Content-Type': 'application/json' },
-    
-                body: JSON.stringify({
-    
-                    username,
-    
-                    watchlistName, // Ensure this matches the backend's expected field name
-    
-                    name: movieName,
-    
-                    genre,
-    
-                    review: parseInt(review) || 0,
-    
-                    description,
-    
-                    platform
-    
-                })
-    
-            });
-    
-    
-    
-            const data = await response.json();
-    
-            console.log("Backend Response:", data); // Log the response
-    
-    
-    
-            if (!response.ok) {
-    
-                throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-    
-            }
-    
-    
-    
-            alert(data.message);
-    
-            closeModal();
-    
-            fetchWatchlists(); // Refresh the watchlists
-    
-        } catch (error) {
-    
-            console.error("Error adding movie:", error);
-    
-            alert("Failed to add movie. Please try again.");
-    
-        }
-    
+    const movieName = document.getElementById("movie-name").value.trim();
+    const genre = document.getElementById("movie-genre").value;
+    const platform = document.getElementById("platform").value;
+    const description = document.getElementById("description").value.trim();
+    const review = document.getElementById("review-rating").value;
+    const watchlistName = localStorage.getItem("selectedWatchlist");
+    const username = localStorage.getItem("username");
+    const userId = localStorage.getItem("userId");
+
+    if (!movieName || !genre || !platform || !watchlistName) {
+        alert("Please fill in all fields.");
+        return;
     }
-    
-    async function fetchMovies(watchlistName) {
-        const username = localStorage.getItem("username");
-        if (!username || !watchlistName) return;
-    
-        try {
-            const response = await fetch(
-                `http://localhost:5000/movies?username=${encodeURIComponent(username)}&watchlistName=${encodeURIComponent(watchlistName)}`
-            );
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-    
-            const result = await response.json();
-            console.log("Fetched Movies:", result); // Debugging
-            
-            // Check if response has success/data structure
-            const movies = result.success ? result.data : result;
-            
-            if (Array.isArray(movies)) {
-                displayMovies(movies, watchlistName);
-            } else {
-                console.error("Unexpected movies format:", movies);
-            }
-        } catch (error) {
-            console.error("Error fetching movies:", error);
+
+    try {
+        // First get watchlist_id for the watchlistName
+        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
+        const watchlists = await watchlistResponse.json();
+        const watchlist = watchlists.find(w => w.name === watchlistName);
+        
+        if (!watchlist) {
+            throw new Error("Watchlist not found");
         }
+
+        const response = await fetch('/movies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                watchlist_id: watchlist.id,
+                name: movieName,
+                genre,
+                review: parseInt(review) || 0,
+                description,
+                platform
+            })
+        });
+
+        const data = await response.json();
+        console.log("Backend Response:", data);
+
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+        }
+
+        alert(data.message);
+        closeModal();
+        fetchMovies(watchlistName); // Refresh just this watchlist's movies
+    } catch (error) {
+        console.error("Error adding movie:", error);
+        alert(error.message || "Failed to add movie. Please try again.");
     }
+}
+    
+async function fetchMovies(watchlistName) {
+    const userId = localStorage.getItem("userId");
+    if (!userId || !watchlistName) return;
+
+    try {
+        // First get watchlist_id for the watchlistName
+        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
+        const watchlists = await watchlistResponse.json();
+        const watchlist = watchlists.find(w => w.name === watchlistName);
+        
+        if (!watchlist) {
+            console.error("Watchlist not found:", watchlistName);
+            return;
+        }
+
+        const response = await fetch(`/movies?watchlist_id=${encodeURIComponent(watchlist.id)}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Fetched Movies:", result);
+        
+        // Handle both response formats (array or {success, data})
+        const movies = Array.isArray(result) ? result : (result.data || []);
+        
+        if (Array.isArray(movies)) {
+            displayMovies(movies, watchlistName);
+        } else {
+            console.error("Unexpected movies format:", movies);
+            displayMovies([], watchlistName); // Show empty state
+        }
+    } catch (error) {
+        console.error("Error fetching movies:", error);
+        displayMovies([], watchlistName); // Show empty state on error
+    }
+}
