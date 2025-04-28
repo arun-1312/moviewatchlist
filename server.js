@@ -121,27 +121,27 @@ app.post("/auth/login", async (req, res) => {
 
   try {
     const result = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
-    
-    if (result.rows.length === 0) {
+
+    if (result.rows.length === 0 || !result.rows[0].userpassword) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const match = await bcrypt.compare(userpassword, result.rows[0].userpassword);
+    
     if (!match) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Successful login - include user ID in response
     res.json({ 
       success: true, 
       data: {
         username: result.rows[0].username,
-        userId: result.rows[0].id  // THIS IS CRUCIAL
+        userId: result.rows[0].id
       }
     });
 
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("❌ Login error:", err);
     res.status(500).json({ error: "Server error during login" });
   }
 });
