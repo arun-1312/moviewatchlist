@@ -48,17 +48,22 @@ async function fetchWatchlists() {
         const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-        const watchlists = await response.json();
+        const result = await response.json();
+        
+        // Handle both response formats:
+        // 1. Direct array response (legacy)
+        // 2. { success: true, data: [...] } (current)
+        const watchlists = Array.isArray(result) ? result : (result.data || []);
+        
+        console.log("Processed Watchlists:", watchlists);
         displayWatchlists(watchlists);
 
         // Fetch movies for each watchlist
-        if (Array.isArray(watchlists)) {
-            watchlists.forEach(watchlist => {
-                if (watchlist.name) {
-                    fetchMovies(watchlist.name);
-                }
-            });
-        }
+        watchlists.forEach(watchlist => {
+            if (watchlist.name) {
+                fetchMovies(watchlist.name);
+            }
+        });
     } catch (error) {
         console.error("Error fetching watchlists:", error);
         alert("Failed to load watchlists. Please refresh the page.");
@@ -119,19 +124,22 @@ function displayWatchlists(watchlists) {
     sidebarContainer.innerHTML = "";
     mainDisplay.innerHTML = "";
 
-    if (!Array.isArray(watchlists)) {
-        console.error("Expected array of watchlists, got:", watchlists);
+    // Ensure we have an array (even if empty)
+    const validWatchlists = Array.isArray(watchlists) ? watchlists : [];
+    
+    if (validWatchlists.length === 0) {
+        mainDisplay.innerHTML = `<p class="empty-state">No watchlists found. Create your first watchlist!</p>`;
         return;
     }
 
-    watchlists.forEach(watchlist => {
-        // Sidebar item
+    validWatchlists.forEach(watchlist => {
+        // Add to sidebar
         const listItem = document.createElement("li");
         listItem.textContent = watchlist.name;
         listItem.addEventListener("click", () => openModal(watchlist.name));
         sidebarContainer.appendChild(listItem);
 
-        // Main display card
+        // Add to main display
         const watchlistCard = document.createElement("div");
         watchlistCard.className = "watchlist-card";
         
