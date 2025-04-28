@@ -28,11 +28,11 @@ function setupEventListeners() {
 }
 
 async function fetchWatchlists() {
-    const username = localStorage.getItem("username");
+    const user_id = localStorage.getItem("userId");
     if (!username) return;
 
     try {
-        const response = await fetch(`http://localhost:5000/watchlists?username=${encodeURIComponent(username)}`);
+        const response = await fetch(`https://movieshelff.onrender.com/watchlists?user_id=${encodeURIComponent(userId)}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const watchlists = await response.json();
@@ -43,7 +43,7 @@ async function fetchWatchlists() {
         if (Array.isArray(watchlists)) {
             watchlists.forEach(watchlist => {
                 // Use the correct watchlist name property based on your API response
-                const watchlistName = watchlist.watchlistName || watchlist.name;
+                const watchlistName = watchlist.name;
                 if (watchlistName) {
                     fetchMovies(watchlistName);
                 }
@@ -157,7 +157,7 @@ function displayWatchlists(watchlists) {
     watchlists.forEach(watchlist => {
         // Add to sidebar
         const listItem = document.createElement("li");
-        listItem.textContent = watchlist.watchlistName;
+        listItem.textContent = watchlist.name;
         listItem.addEventListener("click", () => {
             console.log("Watchlist clicked:", watchlist.watchlistName); // Debugging
             openModal(watchlist.watchlistName);
@@ -170,7 +170,7 @@ function displayWatchlists(watchlists) {
 
         // Watchlist name
         const watchlistNameElement = document.createElement("h3");
-        watchlistNameElement.textContent = watchlist.watchlistName;
+        watchlistNameElement.textContent = watchlist.name;
         watchlistCard.appendChild(watchlistNameElement);
 
         // Movies container

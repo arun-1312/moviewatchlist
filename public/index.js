@@ -51,7 +51,7 @@ async function handleAuth(event) {
         }
 
         localStorage.setItem('username', username);
-        localStorage.setItem('userId', data.data?.userId || data.user?.id);
+        localStorage.setItem('userId', data.data.userId);
         
         window.location.href = 'dashboard.html';
 
