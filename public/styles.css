@@ -613,3 +613,42 @@ p.movie-description {
     height: 1rem;
     border-width: 0.2em;
   }
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 4px;
+    color: white;
+    z-index: 1000;
+    transition: opacity 0.5s;
+  }
+  
+  .notification.success {
+    background-color: #28a745;
+  }
+  
+  .notification.error {
+    background-color: #dc3545;
+  }
+  
+  .notification.info {
+    background-color: #17a2b8;
+  }
+  
+  .fade-out {
+    opacity: 0;
+  }
+  
+ /* Loading spinner style */
+.spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }

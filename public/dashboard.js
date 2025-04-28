@@ -254,20 +254,33 @@ async function createWatchlist() {
 async function addMovie(event) {
     event.preventDefault();
     
-    // Show loading state
-    const submitBtn = document.getElementById("movie-submit-btn");
+    // Get the submit button (now using the correct ID from your form)
+    const submitBtn = document.getElementById("add-movie-btn");
+    const form = document.getElementById("add-movie-form"); // Make sure this ID exists in your HTML
+    
+    if (!submitBtn || !form) {
+      console.error("Form elements not found");
+      return;
+    }
+  
+    // Save original button state
     const originalBtnText = submitBtn.innerHTML;
+    
+    // Set loading state
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+    submitBtn.innerHTML = `
+      <span class="spinner">⌛</span> Adding...
+    `;
   
     try {
+      // Get form data
       const formData = {
-        name: document.getElementById("movie-name").value.trim(),
-        genre: document.getElementById("movie-genre").value,
-        platform: document.getElementById("platform").value,
-        description: document.getElementById("description").value.trim(),
-        review: parseInt(document.getElementById("review-rating").value) || 0,
-        watchlistName: localStorage.getItem("selectedWatchlist")
+        name: document.getElementById("movie-name")?.value.trim() || "",
+        genre: document.getElementById("movie-genre")?.value || "",
+        platform: document.getElementById("platform")?.value || "",
+        description: document.getElementById("description")?.value.trim() || "",
+        review: parseInt(document.getElementById("review-rating")?.value) || 0,
+        watchlistName: localStorage.getItem("selectedWatchlist") || ""
       };
   
       // Validate required fields
@@ -277,9 +290,7 @@ async function addMovie(event) {
   
       // Get watchlist ID
       const watchlistId = await getWatchlistIdByName(formData.watchlistName);
-      if (!watchlistId) {
-        throw new Error("Failed to find watchlist");
-      }
+      if (!watchlistId) throw new Error("Watchlist not found");
   
       // Submit to API
       const response = await fetch(`${API_BASE}/movies`, {
@@ -296,28 +307,41 @@ async function addMovie(event) {
       });
   
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add movie");
+        const error = await response.json();
+        throw new Error(error.message || "Failed to add movie");
       }
   
-      const result = await response.json();
-      console.log("Movie added successfully:", result);
-      
-      // Refresh the movies list
+      // Success - refresh and close
       await fetchMovies(formData.watchlistName);
       closeModal();
-      
-      // Show success message
       alert("Movie added successfully!");
   
     } catch (error) {
       console.error("Add movie error:", error);
       alert(`Error: ${error.message}`);
     } finally {
-      // Reset button state
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnText;
+      // Restore button state
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      }
     }
+  }
+  
+  // Update your form event listener to use the correct ID
+  document.getElementById("add-movie-form")?.addEventListener("submit", addMovie);
+  
+  // Helper function for notifications (add to your utils)
+  function showNotification(message, type = "info") {
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.classList.add("fade-out");
+      setTimeout(() => notification.remove(), 500);
+    }, 3000);
   }
 
 async function fetchMovies(watchlistName) {
