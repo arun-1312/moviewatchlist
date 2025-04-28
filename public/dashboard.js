@@ -1,117 +1,93 @@
-const API_BASE = process.env.NODE_ENV === 'production' 
-  ? 'https://movieshelff.onrender.com' 
-  : 'http://localhost:5000';
-  
+// Environment Configuration
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000' 
+  : 'https://movieshelff.onrender.com';
+
+// Helper function to get watchlist ID by name
+async function getWatchlistIdByName(watchlistName) {
+  const userId = localStorage.getItem("userId");
+  const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
+  const watchlists = await response.json();
+  const watchlist = watchlists.find(w => w.name === watchlistName);
+  return watchlist?.id;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username");
-    if (!username) {
+    const userId = localStorage.getItem("userId");
+    
+    if (!username || !userId) {
         window.location.href = "index.html";
         return;
     }
+    
     document.getElementById("user-name").textContent = username;
-
     fetchWatchlists();
     setupEventListeners();
-    setupStarRating(); // Initialize star rating system
+    setupStarRating();
 });
 
 function logout() {
     localStorage.removeItem("username");
+    localStorage.removeItem("userId");
     window.location.href = "index.html";
 }
+
 function setupEventListeners() {
-    const createWatchlistBtn = document.getElementById("create-watchlist-btn");
-    const logoutBtn = document.getElementById("logout-btn");
-    const closeModalBtn = document.getElementById("close-modal");
-    const addMovieForm = document.getElementById("add-movie-form");
-
-    if (createWatchlistBtn) createWatchlistBtn.addEventListener("click", createWatchlist);
-    if (logoutBtn) logoutBtn.addEventListener("click", logout);
-    if (closeModalBtn) closeModalBtn.addEventListener("click", closeModal);
-    if (addMovieForm) addMovieForm.addEventListener("submit", addMovie);
+    document.getElementById("create-watchlist-btn")?.addEventListener("click", createWatchlist);
+    document.getElementById("logout-btn")?.addEventListener("click", logout);
+    document.getElementById("close-modal")?.addEventListener("click", closeModal);
+    document.getElementById("add-movie-form")?.addEventListener("submit", addMovie);
 }
-
 
 async function fetchWatchlists() {
     const userId = localStorage.getItem("userId");
-    if (!username) return;
+    if (!userId) return;
 
     try {
-        const userId = localStorage.getItem("userId");
-        const response = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
+        const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const watchlists = await response.json();
-        console.log("Fetched Watchlists:", watchlists);
         displayWatchlists(watchlists);
 
-        // Fetch movies for all watchlists
+        // Fetch movies for each watchlist
         if (Array.isArray(watchlists)) {
             watchlists.forEach(watchlist => {
-                // Use the correct watchlist name property based on your API response
-                const watchlistName = watchlist.name;
-                if (watchlistName) {
-                    fetchMovies(watchlistName);
+                if (watchlist.name) {
+                    fetchMovies(watchlist.name);
                 }
             });
         }
     } catch (error) {
         console.error("Error fetching watchlists:", error);
+        alert("Failed to load watchlists. Please refresh the page.");
     }
 }
 
-window.openModal = function (watchlistName) {
+window.openModal = function(watchlistName) {
+    const movieModal = document.getElementById("addMovieModal");
+    if (!movieModal) return;
 
-        const movieModal = document.getElementById("addMovieModal");
-    
-        const modalTitle = document.getElementById("modal-title");
-    
-    
-    
-        if (movieModal) {
-    
-            console.log("Opening modal for watchlist:", watchlistName); // Debugging
-    
-            modalTitle.textContent = `Add Movie to ${watchlistName}`;
-    
-            movieModal.style.display = "block"; // Show the modal
-    
-            movieModal.classList.add("show"); // Add a class to make it visible
-    
-            localStorage.setItem("selectedWatchlist", watchlistName);
-    
-        } else {
-    
-            console.error("Modal not found in the DOM.");
-    
-        }
-    
-    };
-    
+    document.getElementById("modal-title").textContent = `Add Movie to ${watchlistName}`;
+    movieModal.style.display = "block";
+    movieModal.classList.add("show");
+    localStorage.setItem("selectedWatchlist", watchlistName);
+};
+
 function closeModal() {
-    
-        const movieModal = document.getElementById("addMovieModal");
-    
-        if (movieModal) {
-    
-            movieModal.style.display = "none";
-    
-            document.getElementById("add-movie-form").reset();
-    
-            document.getElementById("review-rating").value = 0;
-    
-            const stars = document.querySelectorAll(".star");
-    
-            stars.forEach(star => star.style.color = "#ccc");
-    
-        }
-    
-    }
+    const movieModal = document.getElementById("addMovieModal");
+    if (!movieModal) return;
 
+    movieModal.style.display = "none";
+    document.getElementById("add-movie-form").reset();
+    document.getElementById("review-rating").value = 0;
+    document.querySelectorAll(".star").forEach(star => {
+        star.style.color = "#ccc";
+        star.style.transform = "scale(1)";
+    });
+}
 
-
-// Star Rating System
 function setupStarRating() {
     const stars = document.querySelectorAll(".star");
     const ratingInput = document.getElementById("review-rating");
@@ -120,32 +96,20 @@ function setupStarRating() {
         star.addEventListener("click", () => {
             const value = index + 1;
             ratingInput.value = value;
-            
-            stars.forEach((s, i) => {
-                s.classList.toggle("active", i < value);
-                s.style.transform = i < value ? "scale(1.1)" : "scale(1)";
-            });
+            updateStars(value);
         });
 
-        star.addEventListener("mouseover", () => {
-            const hoverValue = index + 1;
-            stars.forEach((s, i) => {
-                s.style.color = i < hoverValue ? "#ffd700" : "#ccc";
-                s.style.transform = i < hoverValue ? "scale(1.1)" : "scale(1)";
-            });
-        });
-
-        star.addEventListener("mouseout", () => {
-            const currentValue = ratingInput.value;
-            stars.forEach((s, i) => {
-                s.style.color = i < currentValue ? "#ffd700" : "#ccc";
-                s.style.transform = i < currentValue ? "scale(1.1)" : "scale(1)";
-            });
-        });
+        star.addEventListener("mouseover", () => updateStars(index + 1));
+        star.addEventListener("mouseout", () => updateStars(ratingInput.value));
     });
+
+    function updateStars(value) {
+        stars.forEach((star, i) => {
+            star.style.color = i < value ? "#ffd700" : "#ccc";
+            star.style.transform = i < value ? "scale(1.1)" : "scale(1)";
+        });
+    }
 }
-
-
 
 function displayWatchlists(watchlists) {
     const sidebarContainer = document.getElementById("watchlist-container");
@@ -155,34 +119,28 @@ function displayWatchlists(watchlists) {
     sidebarContainer.innerHTML = "";
     mainDisplay.innerHTML = "";
 
-    // Ensure watchlists is an array
     if (!Array.isArray(watchlists)) {
-        console.error("Expected an array of watchlists, but got:", watchlists);
+        console.error("Expected array of watchlists, got:", watchlists);
         return;
     }
 
     watchlists.forEach(watchlist => {
-        // Add to sidebar
+        // Sidebar item
         const listItem = document.createElement("li");
         listItem.textContent = watchlist.name;
-        listItem.addEventListener("click", () => {
-            console.log("Watchlist clicked:", watchlist.watchlistName); // Debugging
-            openModal(watchlist.watchlistName);
-        });
+        listItem.addEventListener("click", () => openModal(watchlist.name));
         sidebarContainer.appendChild(listItem);
 
-        // Add to main display
+        // Main display card
         const watchlistCard = document.createElement("div");
-        watchlistCard.classList.add("watchlist-card");
+        watchlistCard.className = "watchlist-card";
+        
+        const title = document.createElement("h3");
+        title.textContent = watchlist.name;
+        watchlistCard.appendChild(title);
 
-        // Watchlist name
-        const watchlistNameElement = document.createElement("h3");
-        watchlistNameElement.textContent = watchlist.name;
-        watchlistCard.appendChild(watchlistNameElement);
-
-        // Movies container
         const moviesContainer = document.createElement("div");
-        moviesContainer.id = `movies-${watchlist.watchlistName}`; // Unique ID for each watchlist's movies
+        moviesContainer.id = `movies-${watchlist.name.replace(/\s+/g, '-')}`;
         watchlistCard.appendChild(moviesContainer);
 
         mainDisplay.appendChild(watchlistCard);
@@ -190,49 +148,33 @@ function displayWatchlists(watchlists) {
 }
 
 function displayMovies(movies, watchlistName) {
-    const moviesContainer = document.getElementById(`movies-${watchlistName}`);
-    if (!moviesContainer) {
-        console.error("Movies container not found for watchlist:", watchlistName);
-        return;
-    }
+    const containerId = `movies-${watchlistName.replace(/\s+/g, '-')}`;
+    const moviesContainer = document.getElementById(containerId);
+    if (!moviesContainer) return;
 
-    // Clear previous content
     moviesContainer.innerHTML = "";
+    moviesContainer.className = "watchlist-grid";
 
-    // Apply horizontal layout classes
-    moviesContainer.classList.add("watchlist-grid");
-    moviesContainer.style.display = "flex";
-    moviesContainer.style.overflowX = "auto";
-    moviesContainer.style.gap = "20px";
-    moviesContainer.style.paddingBottom = "16px";
-
-    // Ensure movies is an array
     if (!Array.isArray(movies)) {
-        console.error("Expected an array of movies, but got:", movies);
         moviesContainer.innerHTML = "<p>No movies found</p>";
         return;
     }
 
-    // Render each movie
     movies.forEach(movie => {
         const movieCard = document.createElement("div");
-        movieCard.classList.add("movie-card");
-        movieCard.style.minWidth = "240px"; // Ensure fixed width
-        movieCard.style.flexShrink = "0"; // Prevent squishing
-
+        movieCard.className = "movie-card";
         movieCard.innerHTML = `
             <div class="movie-header">
                 <h4>${movie.name}</h4>
-                <span class="trash-icon" data-movie-name="${movie.name}">🗑️</span>
+                <span class="trash-icon" data-movie="${movie.name}">🗑️</span>
             </div>
-            <p><strong>Genre:</strong> ${movie.genre}</p>
-            <p><strong>Platform:</strong> ${movie.platform}</p>
-            <p><strong>Review:</strong> ${"★".repeat(movie.review)}</p>
-            <p><strong>Description:</strong> ${movie.description}</p>
+            <p><strong>Genre:</strong> ${movie.genre || 'N/A'}</p>
+            <p><strong>Platform:</strong> ${movie.platform || 'N/A'}</p>
+            <p><strong>Review:</strong> ${"★".repeat(movie.review || 0)}</p>
+            <p><strong>Description:</strong> ${movie.description || 'No description'}</p>
         `;
 
-        const trashIcon = movieCard.querySelector(".trash-icon");
-        trashIcon.addEventListener("click", (e) => {
+        movieCard.querySelector(".trash-icon").addEventListener("click", (e) => {
             e.stopPropagation();
             deleteMovie(movie.name, watchlistName);
         });
@@ -241,190 +183,135 @@ function displayMovies(movies, watchlistName) {
     });
 }
 
-
-async function deleteMovie(movieName, watchlistName) {
-    const userId = localStorage.getItem("userId");
-    if (!userId || !watchlistName || !movieName) return;
-
-    // Confirmation dialog
-    const confirmDelete = confirm("Are you sure you want to delete this movie?");
-    if (!confirmDelete) return;
-
-    try {
-        // First get watchlist_id for the watchlistName
-        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
-        const watchlists = await watchlistResponse.json();
-        const watchlist = watchlists.find(w => w.name === watchlistName);
-        
-        if (!watchlist) {
-            throw new Error("Watchlist not found");
-        }
-
-        const response = await fetch('/movies', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                watchlist_id: watchlist.id,
-                movieName
-            })
-        });
-
-        const result = await response.json();
-        console.log("Backend Response:", result);
-
-        if (!response.ok) {
-            throw new Error(result.error || `HTTP error! Status: ${response.status}`);
-        }
-
-        alert(result.message);
-        fetchMovies(watchlistName); // Refresh the movie list
-    } catch (error) {
-        console.error("Error deleting movie:", error);
-        alert(error.message || "Failed to delete movie. Please try again.");
-    }
-}
-
 async function createWatchlist() {
-    const watchlistName = document.getElementById("watchlist-name").value.trim();
-    const createWatchlistBtn = document.getElementById("create-watchlist-btn");
-    const createWatchlistText = document.getElementById("create-watchlist-text");
-    const createWatchlistSpinner = document.getElementById("create-watchlist-spinner");
+    const nameInput = document.getElementById("watchlist-name");
+    const watchlistName = nameInput.value.trim();
     const errorMessage = document.getElementById("errorMessage");
-
-    // Check if elements exist
-    if (!createWatchlistBtn || !createWatchlistText || !createWatchlistSpinner) {
-        console.error("One or more elements are missing in the DOM.");
-        return;
-    }
-
+    
     if (!watchlistName) {
         errorMessage.textContent = "Please enter a watchlist name.";
         return;
     }
 
-    // Disable button and show spinner
-    createWatchlistBtn.disabled = true;
-    createWatchlistText.style.display = "none";
-    createWatchlistSpinner.style.display = "inline-block";
+    const btn = document.getElementById("create-watchlist-btn");
+    const btnText = document.getElementById("create-watchlist-text");
+    const spinner = document.getElementById("create-watchlist-spinner");
+
+    btn.disabled = true;
+    btnText.style.display = "none";
+    spinner.style.display = "inline-block";
+    errorMessage.textContent = "";
 
     try {
-        const response = await fetch('http://localhost:5000/watchlists', {
+        const userId = localStorage.getItem("userId");
+        const response = await fetch(`${API_BASE}/watchlists`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: localStorage.getItem("username"), watchlistName })
+            body: JSON.stringify({ user_id: userId, name: watchlistName })
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+            const error = await response.json();
+            throw new Error(error.error || "Failed to create watchlist");
         }
 
-        const data = await response.json();
-        alert(data.message);
-        fetchWatchlists();
-        document.getElementById("watchlist-name").value = "";
+        nameInput.value = "";
+        await fetchWatchlists();
     } catch (error) {
-        console.error("Error creating watchlist:", error);
-        errorMessage.textContent = error.message || "Failed to create watchlist. Please try again.";
+        console.error("Create watchlist error:", error);
+        errorMessage.textContent = error.message;
     } finally {
-        // Re-enable button and hide spinner
-        createWatchlistBtn.disabled = false;
-        createWatchlistText.style.display = "inline-block";
-        createWatchlistSpinner.style.display = "none";
+        btn.disabled = false;
+        btnText.style.display = "inline-block";
+        spinner.style.display = "none";
     }
 }
 
 async function addMovie(event) {
     event.preventDefault();
+    
+    const formData = {
+        name: document.getElementById("movie-name").value.trim(),
+        genre: document.getElementById("movie-genre").value,
+        platform: document.getElementById("platform").value,
+        description: document.getElementById("description").value.trim(),
+        review: parseInt(document.getElementById("review-rating").value) || 0,
+        watchlistName: localStorage.getItem("selectedWatchlist")
+    };
 
-    const movieName = document.getElementById("movie-name").value.trim();
-    const genre = document.getElementById("movie-genre").value;
-    const platform = document.getElementById("platform").value;
-    const description = document.getElementById("description").value.trim();
-    const review = document.getElementById("review-rating").value;
-    const watchlistName = localStorage.getItem("selectedWatchlist");
-    const username = localStorage.getItem("username");
-    const userId = localStorage.getItem("userId");
-
-    if (!movieName || !genre || !platform || !watchlistName) {
-        alert("Please fill in all fields.");
+    if (!formData.name || !formData.genre || !formData.platform || !formData.watchlistName) {
+        alert("Please fill in all required fields.");
         return;
     }
 
     try {
-        // First get watchlist_id for the watchlistName
-        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
-        const watchlists = await watchlistResponse.json();
-        const watchlist = watchlists.find(w => w.name === watchlistName);
-        
-        if (!watchlist) {
-            throw new Error("Watchlist not found");
-        }
+        const watchlistId = await getWatchlistIdByName(formData.watchlistName);
+        if (!watchlistId) throw new Error("Watchlist not found");
 
-        const response = await fetch('/movies', {
+        const response = await fetch(`${API_BASE}/movies`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                watchlist_id: watchlist.id,
-                name: movieName,
-                genre,
-                review: parseInt(review) || 0,
-                description,
-                platform
+                watchlist_id: watchlistId,
+                name: formData.name,
+                genre: formData.genre,
+                review: formData.review,
+                description: formData.description,
+                platform: formData.platform
             })
         });
 
-        const data = await response.json();
-        console.log("Backend Response:", data);
-
         if (!response.ok) {
-            throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+            const error = await response.json();
+            throw new Error(error.error || "Failed to add movie");
         }
 
-        alert(data.message);
         closeModal();
-        fetchMovies(watchlistName); // Refresh just this watchlist's movies
+        await fetchMovies(formData.watchlistName);
     } catch (error) {
-        console.error("Error adding movie:", error);
-        alert(error.message || "Failed to add movie. Please try again.");
+        console.error("Add movie error:", error);
+        alert(error.message);
     }
 }
-    
+
 async function fetchMovies(watchlistName) {
-    const userId = localStorage.getItem("userId");
-    if (!userId || !watchlistName) return;
-
     try {
-        // First get watchlist_id for the watchlistName
-        const watchlistResponse = await fetch(`/watchlists?user_id=${encodeURIComponent(userId)}`);
-        const watchlists = await watchlistResponse.json();
-        const watchlist = watchlists.find(w => w.name === watchlistName);
-        
-        if (!watchlist) {
-            console.error("Watchlist not found:", watchlistName);
-            return;
-        }
+        const watchlistId = await getWatchlistIdByName(watchlistName);
+        if (!watchlistId) return;
 
-        const response = await fetch(`/movies?watchlist_id=${encodeURIComponent(watchlist.id)}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        const response = await fetch(`${API_BASE}/movies?watchlist_id=${encodeURIComponent(watchlistId)}`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const result = await response.json();
-        console.log("Fetched Movies:", result);
-        
-        // Handle both response formats (array or {success, data})
         const movies = Array.isArray(result) ? result : (result.data || []);
-        
-        if (Array.isArray(movies)) {
-            displayMovies(movies, watchlistName);
-        } else {
-            console.error("Unexpected movies format:", movies);
-            displayMovies([], watchlistName); // Show empty state
-        }
+        displayMovies(movies, watchlistName);
     } catch (error) {
-        console.error("Error fetching movies:", error);
-        displayMovies([], watchlistName); // Show empty state on error
+        console.error("Fetch movies error:", error);
+        displayMovies([], watchlistName);
+    }
+}
+
+async function deleteMovie(movieName, watchlistName) {
+    if (!confirm("Are you sure you want to delete this movie?")) return;
+
+    try {
+        const watchlistId = await getWatchlistIdByName(watchlistName);
+        if (!watchlistId) throw new Error("Watchlist not found");
+
+        const response = await fetch(`${API_BASE}/movies`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ watchlist_id: watchlistId, movieName })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to delete movie");
+        }
+
+        await fetchMovies(watchlistName);
+    } catch (error) {
+        console.error("Delete movie error:", error);
+        alert(error.message);
     }
 }
