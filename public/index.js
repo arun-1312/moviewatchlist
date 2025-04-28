@@ -21,12 +21,10 @@ async function handleAuth(event) {
     const isLoginMode = form.dataset.mode === 'login';
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('userpassword').value.trim();
+    const errorElement = document.getElementById('errorMessage');
 
-    // Validation
-    if (!username || !password) {
-        errorMessage.textContent = "Username and password are required";
-        return;
-    }
+    // Clear previous errors
+    errorElement.textContent = '';
 
     // Show loading state
     registerBtn.disabled = true;
@@ -38,10 +36,7 @@ async function handleAuth(event) {
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                username, 
-                userpassword: password 
-            })
+            body: JSON.stringify({ username, userpassword: password })
         });
 
         const data = await response.json();
@@ -50,17 +45,18 @@ async function handleAuth(event) {
             throw new Error(data.error || 'Authentication failed');
         }
 
-        // Schema-aligned data storage
-        const userId = data.data?.userId || data.user?.id;
-        if (!userId) throw new Error('Missing user ID');
-        
+        // Verify and store user data
+        if (!data.data?.userId && !data.user?.id) {
+            throw new Error('Authentication succeeded but no user ID received');
+        }
+
         localStorage.setItem('username', username);
-        localStorage.setItem('userId', userId); // Critical for watchlists.user_id
+        localStorage.setItem('userId', data.data?.userId || data.user?.id);
         
         window.location.href = 'dashboard.html';
 
     } catch (error) {
-        errorMessage.textContent = error.message;
+        errorElement.textContent = error.message;
         console.error('Auth error:', error);
     } finally {
         registerBtn.disabled = false;
