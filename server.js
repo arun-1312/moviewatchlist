@@ -169,14 +169,32 @@ app.post("/watchlists", async (req, res) => {
 });
 
 // Get User Watchlists
+// Fetch Watchlists for a User - Updated with better error handling
 app.get("/watchlists", async (req, res) => {
   const { user_id } = req.query;
 
   if (!user_id) {
-    return res.status(400).json({ error: "User ID is required" });
+    return res.status(400).json({ 
+      success: false,
+      error: "User ID is required" 
+    });
   }
 
   try {
+    // Verify user exists first
+    const userCheck = await pool.query(
+      "SELECT id FROM users WHERE id = $1",
+      [user_id]
+    );
+    
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found"
+      });
+    }
+
+    // Get watchlists
     const result = await pool.query(
       "SELECT id, name, user_id FROM watchlists WHERE user_id = $1",
       [user_id]
@@ -187,9 +205,12 @@ app.get("/watchlists", async (req, res) => {
       data: result.rows
     });
 
-  } catch (error) {
-    console.error("Get watchlists error:", error);
-    res.status(500).json({ error: "Failed to fetch watchlists" });
+  } catch (err) {
+    console.error("Database Error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Database error occurred"
+    });
   }
 });
 

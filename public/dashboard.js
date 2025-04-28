@@ -58,34 +58,63 @@ function setupEventListeners() {
 
 async function fetchWatchlists() {
     const userId = localStorage.getItem("userId");
-    if (!userId) return;
+    if (!userId) {
+        console.error("No user ID found");
+        return;
+    }
 
     try {
         const response = await fetch(`${API_BASE}/watchlists?user_id=${encodeURIComponent(userId)}`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(
+                errorData.error || 
+                `Server error: ${response.status} ${response.statusText}`
+            );
+        }
 
         const result = await response.json();
         
-        // Handle both response formats:
-        // 1. Direct array response (legacy)
-        // 2. { success: true, data: [...] } (current)
-        const watchlists = Array.isArray(result) ? result : (result.data || []);
+        // Handle both response formats
+        const watchlists = result.success ? result.data : result;
         
-        console.log("Processed Watchlists:", watchlists);
+        if (!Array.isArray(watchlists)) {
+            throw new Error("Invalid watchlists data format");
+        }
+
+        console.log("Watchlists loaded:", watchlists);
         displayWatchlists(watchlists);
 
         // Fetch movies for each watchlist
-        watchlists.forEach(watchlist => {
-            if (watchlist.name) {
-                fetchMovies(watchlist.name);
-            }
-        });
+        await Promise.all(
+            watchlists.map(watchlist => 
+                watchlist.name ? fetchMovies(watchlist.name) : Promise.resolve()
+            )
+        );
+
     } catch (error) {
         console.error("Error fetching watchlists:", error);
-        alert("Failed to load watchlists. Please refresh the page.");
+        
+        // Show user-friendly error
+        const watchlistDisplay = document.getElementById("watchlist-display");
+        if (watchlistDisplay) {
+            watchlistDisplay.innerHTML = `
+                <div class="alert alert-danger">
+                    Failed to load watchlists. 
+                    <button onclick="fetchWatchlists()" class="btn btn-sm btn-warning">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Optionally: Logout if it's an authentication issue
+        if (error.message.includes("401") || error.message.includes("403")) {
+            logout();
+        }
     }
 }
-
 window.openModal = function(watchlistName) {
     const movieModal = document.getElementById("addMovieModal");
     if (!movieModal) return;
