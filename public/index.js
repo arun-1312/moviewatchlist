@@ -50,8 +50,8 @@ async function handleAuth(event) {
             throw new Error('Authentication succeeded but no user ID received');
         }
 
-        localStorage.setItem('username', username);
-        localStorage.setItem('userId', data.userId);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("userId", data.userId);
         
         window.location.href = 'dashboard.html';
 
