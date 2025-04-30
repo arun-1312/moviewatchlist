@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Enhanced rate limiting for auth endpoints
 const authLimiter = rateLimit({
